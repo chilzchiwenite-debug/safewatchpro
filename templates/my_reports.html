@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>📋 My Reports</h2>
+
+{% if reports %}
+
+    {% for report in reports %}
+
+    <div class="card">
+
+        <h3>{{ report.title }}</h3>
+
+        <p>{{ report.description }}</p>
+
+        <p><b>State:</b> {{ report.state }}</p>
+
+        <p><b>Category:</b> {{ report.category }}</p>
+
+        <p><b>Severity:</b> {{ report.severity }}</p>
+
+        <p><b>Date:</b> {{ report.created_at }}</p>
+
+        <a href="{{ url_for('view_report', report_id=report.id) }}">
+            👁️ View
+        </a>
+
+        <br>
+
+        <a href="{{ url_for('delete_own_report', report_id=report.id) }}">
+            ❌ Delete
+        </a>
+
+    </div>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No reports yet.</p>
+
+{% endif %}
+
+{% endblock %}

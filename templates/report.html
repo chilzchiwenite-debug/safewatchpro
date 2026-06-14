@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>🚨 Report Incident</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+    <label>Title</label>
+    <input type="text" name="title" required>
+
+    <label>Description</label>
+    <textarea name="description" required></textarea>
+
+    <label>Category</label>
+    <select name="category" required>
+        <option>Kidnapping</option>
+        <option>Armed Robbery</option>
+        <option>Bandit Attack</option>
+        <option>Fire Outbreak</option>
+        <option>Road Accident</option>
+        <option>Missing Person</option>
+    </select>
+
+    <!-- ✅ NEW FIELD: STATE -->
+    <label>State</label>
+    <select name="state" required>
+
+        <option value="">Select State</option>
+
+        <option>Abia</option>
+        <option>Adamawa</option>
+        <option>Akwa Ibom</option>
+        <option>Anambra</option>
+        <option>Bauchi</option>
+        <option>Bayelsa</option>
+        <option>Benue</option>
+        <option>Borno</option>
+        <option>Cross River</option>
+        <option>Delta</option>
+        <option>Ebonyi</option>
+        <option>Edo</option>
+        <option>Ekiti</option>
+        <option>Enugu</option>
+        <option>Gombe</option>
+        <option>Imo</option>
+        <option>Jigawa</option>
+        <option>Kaduna</option>
+        <option>Kano</option>
+        <option>Katsina</option>
+        <option>Kebbi</option>
+        <option>Kogi</option>
+        <option>Kwara</option>
+        <option>Lagos</option>
+        <option>Nasarawa</option>
+        <option>Niger</option>
+        <option>Ogun</option>
+        <option>Ondo</option>
+        <option>Osun</option>
+        <option>Oyo</option>
+        <option>Plateau</option>
+        <option>Rivers</option>
+        <option>Sokoto</option>
+        <option>Taraba</option>
+        <option>Yobe</option>
+        <option>Zamfara</option>
+        <option>FCT Abuja</option>
+
+    </select>
+
+    <label>Select Location on Map</label>
+
+<div id="map" style="height:300px;"></div>
+
+<input type="hidden" name="latitude" id="lat">
+<input type="hidden" name="longitude" id="lng">
+<input type="hidden" name="address" id="address">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<script>
+var map = L.map('map').setView([9.0820, 8.6753], 6);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'SafeWatch'
+}).addTo(map);
+
+var marker;
+
+map.on('click', function(e) {
+
+    if (marker) {
+        map.removeLayer(marker);
+    }
+
+    marker = L.marker(e.latlng).addTo(map);
+
+    let lat = e.latlng.lat;
+    let lng = e.latlng.lng;
+
+    document.getElementById("lat").value = lat;
+    document.getElementById("lng").value = lng;
+
+    // 🌍 Reverse Geocoding (GET ADDRESS)
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+    .then(res => res.json())
+    .then(data => {
+
+        let address = data.display_name;
+
+        // Create hidden input if not exists
+        let input = document.getElementById("address");
+
+        if (!input) {
+            input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "address";
+            input.id = "address";
+            document.querySelector("form").appendChild(input);
+        }
+
+        input.value = address;
+
+        alert("Location Selected:\n" + address);
+
+    });
+
+});
+</script>
+
+    <!-- IMAGE UPLOAD -->
+    <label>Evidence Image (Optional)</label>
+    <input type="file" name="image" accept="image/*">
+
+    <button type="submit">Submit Report</button>
+
+
+</form>
+
+{% endblock %}

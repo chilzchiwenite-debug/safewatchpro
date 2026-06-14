@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>🗺️ Live Incident Map</h2>
+
+<!-- MAP AREA -->
+<div id="map" style="height:500px; width:100%;"></div>
+
+<!-- LEAFLET MAP LIBRARY -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// 1. Create map centered on Nigeria
+var map = L.map('map').setView([9.0820, 8.6753], 6);
+
+// 2. Load map tiles (real world map)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'SafeWatch Nigeria'
+}).addTo(map);
+
+// 3. Get reports from Flask API
+fetch("/api/reports")
+.then(res => res.json())
+.then(data => {
+
+    // 4. Loop through each report
+    data.forEach(r => {
+
+        // 5. Choose marker color
+        let color = "green";
+
+        if (r.severity === "high") {
+            color = "red";
+        } else if (r.severity === "medium") {
+            color = "orange";
+        }
+
+        // 6. Add marker to map
+        L.circleMarker([r.latitude, r.longitude], {
+            radius: 8,
+            color: color,
+            fillOpacity: 0.8
+        })
+        .addTo(map)
+        .bindPopup(
+            "<b>" + r.title + "</b><br>" +
+            "Category: " + r.category + "<br>" +
+            "Severity: " + r.severity + "<br>" +
+            "Date: " + r.created_at
+        );
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

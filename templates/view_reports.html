@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>👁️ Report Details</h2>
+
+<div class="card">
+
+    <h3>{{ report.title }}</h3>
+
+    <p><b>Description:</b> {{ report.description }}</p>
+
+    <p><b>Category:</b> {{ report.category }}</p>
+
+    <p><b>Severity:</b> {{ report.severity }}</p>
+
+    <p><b>State:</b> {{ report.state }}</p>
+
+    <p><b>Latitude:</b> {{ report.latitude }}</p>
+
+    <p><b>Longitude:</b> {{ report.longitude }}</p>
+
+    <p><b>Date:</b> {{ report.created_at }}</p>
+
+    <p><b>Reported by:</b> {{ report.author.username }}</p>
+
+</div>
+
+<a href="{{ url_for('dashboard') }}">
+    🔙 Back to Dashboard
+</a>
+
+{% endblock %}
