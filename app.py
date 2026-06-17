@@ -31,7 +31,7 @@ from engine import calculate_severity
 from flask import redirect, url_for
 
 # ---------------- APP SETUP ----------------
-app = Flask(__name__)
+application = Flask(__name__)
 app.config.from_object(Config)
 
 app.config["UPLOAD_FOLDER"] = "static/uploads"
