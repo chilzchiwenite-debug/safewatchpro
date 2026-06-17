@@ -1,35 +1,35 @@
 import os
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+basedir = os.path.abspath(os.path.dirname(_file_))
 
 class Config:
-    # Security key
+    # -----------------------
+    # SECURITY
+    # -----------------------
     SECRET_KEY = os.getenv("SECRET_KEY", "change-this-later")
 
-    # DATABASE (Render PostgreSQL compatible)
+    # -----------------------
+    # DATABASE (Render PostgreSQL safe)
+    # -----------------------
     DATABASE_URL = os.getenv("DATABASE_URL")
 
-    # Fix for Render PostgreSQL (VERY IMPORTANT)
     if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL or "sqlite:///" + os.path.join(basedir, "instance", "safewatch.db")
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL or \
+        "sqlite:///" + os.path.join(basedir, "instance", "safewatch.db")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # -----------------------
-    # EMAIL SETTINGS
+    # EMAIL SETTINGS (SECURE VERSION)
     # -----------------------
-
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
 
-    # Replace with your Gmail address
-    MAIL_USERNAME = "chilzchiwenite@gmail.com"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
-    # Replace with your Gmail App Password
-    MAIL_PASSWORD = "mfafbpylaryvvbxi"
-
-    MAIL_DEFAULT_SENDER = "chilzchiwenite@gmail.com"
+    MAIL_DEFAULT_SENDER = MAIL_USERNAME
