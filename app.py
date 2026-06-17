@@ -20,6 +20,8 @@ from db import db
 from models import User, Report
 from engine import calculate_severity
 
+from flask import redirect, url_for
+
 # ---------------- APP SETUP ----------------
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -247,6 +249,22 @@ def admin():
     reports = Report.query.all()
 
     return render_template("admin.html", users=users, reports=reports)
+
+
+
+@app.route('/delete_user/<int:user_id>')
+@login_required
+def delete_user(user_id):
+    # OPTIONAL: protect admin only
+    if not current_user.is_admin:
+        return "Unauthorized", 403
+
+    user = User.query.get_or_404(user_id)
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return redirect(url_for('admin'))
 
 # ---------------- API STATS ----------------
 @app.route("/api/stats")
