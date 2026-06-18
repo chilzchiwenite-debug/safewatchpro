@@ -17,7 +17,7 @@ from engine import calculate_severity
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ---------------- DATABASE FIX (RENDER) ----------------
+# ---------------- FIX: DATABASE ----------------
 db_url = os.getenv("DATABASE_URL")
 
 if db_url and db_url.startswith("postgres://"):
@@ -57,7 +57,7 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-# ---------------- INIT DB ----------------
+# ---------------- DB INIT ----------------
 with app.app_context():
     db.create_all()
 
@@ -216,7 +216,7 @@ def admin():
 @app.route('/delete_user/<int:user_id>')
 @login_required
 def delete_user(user_id):
-    if not current_user.is_admin:
+    if not current_user.role == "admin":
         return "Unauthorized", 403
 
     user = User.query.get_or_404(user_id)

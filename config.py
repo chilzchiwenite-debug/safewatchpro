@@ -33,3 +33,6 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
+
+    UPLOAD_FOLDER = os.path.join(basedir, "static", "uploads")
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size

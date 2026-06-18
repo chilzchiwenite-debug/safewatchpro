@@ -1,4 +1,8 @@
 def calculate_severity(category):
+    if not category:
+        return "low"
+
+    category = category.strip()
 
     high = [
         "Kidnapping",

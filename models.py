@@ -3,7 +3,7 @@ from flask_login import UserMixin
 
 
 class User(db.Model, UserMixin):
-    _tablename_ = "user"   # ✅ FIXED (you wrote tablename before)
+    tablename = "user"   # ✅ FIXED (you wrote tablename before)
 
     id = db.Column(db.Integer, primary_key=True)
 
