@@ -2,55 +2,44 @@
 
 {% block content %}
 
-<h2>🚨 SafeWatchControl Center</h2>
+<h2>🚨 SafeWatch Control Center</h2>
 
-<div style="background:#a91d1d44; color:white; padding:12px; border-radius:10px; margin-bottom:15px;">
+<div style="background:#a91d1d22; padding:12px; border-radius:10px; margin-bottom:15px;">
 
-<h3>🧠 Intelligence Summary</h3>
+    <h3>🧠 Intelligence Summary</h3>
 
-<div id="summaryBox" style="
-    background:#111;
-    color:#fff;
-    padding:15px;
-    border-radius:10px;
-    margin-bottom:15px;
-">
-    Loading insights...
-</div>
+    <div id="summaryBox" style="background:#111;color:#fff;padding:15px;border-radius:10px;">
+        Loading insights...
+    </div>
 
-    <h3>Live Monitoring Dashboard</h3>
-    <h3>📊 Incident Analytics</h3>
-    <h3>🥧 Category Distribution</h3>
-
-    <canvas id="categoryChart" width="400" height="200"></canvas>
-    <canvas id="reportChart" width="400" height="200"></canvas>
-
-    <div id="summaryBox"></div>
-
-    <p><b>Status:</b> <span style="color: lime;">ACTIVE</span> 🟢</p>
+    <p><b>Status:</b> <span style="color:green;">ACTIVE 🟢</span></p>
 
     <p><b>Total Reports:</b> {{ reports|length }}</p>
-    <p><b>System:</b> Online</p>
+
 </div>
+
+<hr>
+
+<h3>📊 Incident Analytics</h3>
+
+<canvas id="reportChart" width="400" height="200"></canvas>
+<canvas id="categoryChart" width="400" height="200"></canvas>
+
+<hr>
 
 <h3>Recent Reports</h3>
 
 <style>
-    .report-entry {
-        background: #fff;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 10px;
-    }
-    .report-entry.high {
-        border-left: 5px solid red;
-    }
-    .report-entry.medium {
-        border-left: 5px solid yellow;
-    }
-    .report-entry.low {
-        border-left: 5px solid green;
-    }
+.report-entry {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    color: #000;
+}
+.report-entry.high { border-left: 5px solid red; }
+.report-entry.medium { border-left: 5px solid orange; }
+.report-entry.low { border-left: 5px solid green; }
 </style>
 
 {% for r in reports %}
@@ -58,13 +47,10 @@
 <div class="report-entry {{ r.severity|lower }}">
 
     <h4>{{ r.title }}</h4>
-
     <p>{{ r.description }}</p>
 
-    <p><b>State:</b> {{ r.state }}</p>
-
+    <p><b>State:</b> {{ r.state or "N/A" }}</p>
     <p><b>Category:</b> {{ r.category }}</p>
-
     <p><b>Severity:</b> {{ r.severity }}</p>
 
 </div>
@@ -78,12 +64,8 @@ fetch("/api/stats")
 .then(res => res.json())
 .then(data => {
 
-    // ======================
-    // BAR CHART (SEVERITY)
-    // ======================
-    const ctx = document.getElementById("reportChart").getContext("2d");
-
-    new Chart(ctx, {
+    // BAR CHART
+    new Chart(document.getElementById("reportChart"), {
         type: "bar",
         data: {
             labels: ["High", "Medium", "Low"],
@@ -92,24 +74,11 @@ fetch("/api/stats")
                 data: [data.high, data.medium, data.low],
                 backgroundColor: ["red", "orange", "green"]
             }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: "Security Incident Analytics"
-                }
-            }
         }
     });
 
-    // ======================
-    // PIE CHART (CATEGORY)
-    // ======================
-    const ctx2 = document.getElementById("categoryChart").getContext("2d");
-
-    new Chart(ctx2, {
+    // PIE CHART
+    new Chart(document.getElementById("categoryChart"), {
         type: "pie",
         data: {
             labels: ["High", "Medium", "Low"],
@@ -120,11 +89,7 @@ fetch("/api/stats")
         }
     });
 
-    // ======================
-    // INTELLIGENCE SUMMARY
-    // ======================
-    const summaryBox = document.getElementById("summaryBox");
-
+    // SUMMARY BOX
     let total = data.high + data.medium + data.low;
 
     let highest = "Low";
@@ -145,14 +110,12 @@ fetch("/api/stats")
         message = "🟢 System stable: Low-risk incidents dominate.";
     }
 
-    summaryBox.innerHTML = `
+    document.getElementById("summaryBox").innerHTML = `
         <p><b>Total Incidents:</b> ${total}</p>
         <p><b>Dominant Level:</b> ${highest}</p>
         <p>${message}</p>
     `;
-
 });
 </script>
-
 
 {% endblock %}

@@ -1,9 +1,23 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SafeWatch Pro</title>
+</head>
+<body>
 
-{% block content %}
+    <nav>
+        <a href="/">Home</a> |
+        <a href="/login">Login</a> |
+        <a href="/register">Register</a> |
+        <a href="/dashboard">Dashboard</a> |
+        <a href="/report">Report</a> |
+        <a href="/logout">Logout</a>
+    </nav>
 
-<h1>Welcome to SafeWatch Pro Nigeria 🚨</h1>
+    <hr>
 
-<p>A national security reporting and monitoring system.</p>
+    {% block content %}{% endblock %}
 
-{% endblock %}
+</body>
+</html>

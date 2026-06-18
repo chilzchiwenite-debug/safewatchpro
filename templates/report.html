@@ -2,141 +2,120 @@
 
 {% block content %}
 
-<h2>🚨 Report Incident</h2>
+<h2>🚨 SafeWatch Control Center</h2>
 
-<form method="POST" enctype="multipart/form-data">
+<div style="background:#a91d1d22; padding:12px; border-radius:10px; margin-bottom:15px;">
 
-    <label>Title</label>
-    <input type="text" name="title" required>
+    <h3>🧠 Intelligence Summary</h3>
 
-    <label>Description</label>
-    <textarea name="description" required></textarea>
+    <div id="summaryBox" style="background:#111;color:#fff;padding:15px;border-radius:10px;">
+        Loading insights...
+    </div>
 
-    <label>Category</label>
-    <select name="category" required>
-        <option>Kidnapping</option>
-        <option>Armed Robbery</option>
-        <option>Bandit Attack</option>
-        <option>Fire Outbreak</option>
-        <option>Road Accident</option>
-        <option>Missing Person</option>
-    </select>
+    <p><b>Status:</b> <span style="color:green;">ACTIVE 🟢</span></p>
 
-    <!-- ✅ NEW FIELD: STATE -->
-    <label>State</label>
-    <select name="state" required>
+    <p><b>Total Reports:</b> {{ reports|length }}</p>
 
-        <option value="">Select State</option>
+</div>
 
-        <option>Abia</option>
-        <option>Adamawa</option>
-        <option>Akwa Ibom</option>
-        <option>Anambra</option>
-        <option>Bauchi</option>
-        <option>Bayelsa</option>
-        <option>Benue</option>
-        <option>Borno</option>
-        <option>Cross River</option>
-        <option>Delta</option>
-        <option>Ebonyi</option>
-        <option>Edo</option>
-        <option>Ekiti</option>
-        <option>Enugu</option>
-        <option>Gombe</option>
-        <option>Imo</option>
-        <option>Jigawa</option>
-        <option>Kaduna</option>
-        <option>Kano</option>
-        <option>Katsina</option>
-        <option>Kebbi</option>
-        <option>Kogi</option>
-        <option>Kwara</option>
-        <option>Lagos</option>
-        <option>Nasarawa</option>
-        <option>Niger</option>
-        <option>Ogun</option>
-        <option>Ondo</option>
-        <option>Osun</option>
-        <option>Oyo</option>
-        <option>Plateau</option>
-        <option>Rivers</option>
-        <option>Sokoto</option>
-        <option>Taraba</option>
-        <option>Yobe</option>
-        <option>Zamfara</option>
-        <option>FCT Abuja</option>
+<hr>
 
-    </select>
+<h3>📊 Incident Analytics</h3>
 
-    <label>Select Location on Map</label>
+<canvas id="reportChart" width="400" height="200"></canvas>
+<canvas id="categoryChart" width="400" height="200"></canvas>
 
-<div id="map" style="height:300px;"></div>
+<hr>
 
-<input type="hidden" name="latitude" id="lat">
-<input type="hidden" name="longitude" id="lng">
-<input type="hidden" name="address" id="address">
+<h3>Recent Reports</h3>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+.report-entry {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    color: #000;
+}
+.report-entry.high { border-left: 5px solid red; }
+.report-entry.medium { border-left: 5px solid orange; }
+.report-entry.low { border-left: 5px solid green; }
+</style>
 
+{% for r in reports %}
+
+<div class="report-entry {{ r.severity|lower }}">
+
+    <h4>{{ r.title }}</h4>
+    <p>{{ r.description }}</p>
+
+    <p><b>State:</b> {{ r.state or "N/A" }}</p>
+    <p><b>Category:</b> {{ r.category }}</p>
+    <p><b>Severity:</b> {{ r.severity }}</p>
+
+</div>
+
+{% endfor %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-var map = L.map('map').setView([9.0820, 8.6753], 6);
+fetch("/api/stats")
+.then(res => res.json())
+.then(data => {
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'SafeWatch'
-}).addTo(map);
-
-var marker;
-
-map.on('click', function(e) {
-
-    if (marker) {
-        map.removeLayer(marker);
-    }
-
-    marker = L.marker(e.latlng).addTo(map);
-
-    let lat = e.latlng.lat;
-    let lng = e.latlng.lng;
-
-    document.getElementById("lat").value = lat;
-    document.getElementById("lng").value = lng;
-
-    // 🌍 Reverse Geocoding (GET ADDRESS)
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
-    .then(res => res.json())
-    .then(data => {
-
-        let address = data.display_name;
-
-        // Create hidden input if not exists
-        let input = document.getElementById("address");
-
-        if (!input) {
-            input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "address";
-            input.id = "address";
-            document.querySelector("form").appendChild(input);
+    // BAR CHART
+    new Chart(document.getElementById("reportChart"), {
+        type: "bar",
+        data: {
+            labels: ["High", "Medium", "Low"],
+            datasets: [{
+                label: "Incident Levels",
+                data: [data.high, data.medium, data.low],
+                backgroundColor: ["red", "orange", "green"]
+            }]
         }
-
-        input.value = address;
-
-        alert("Location Selected:\n" + address);
-
     });
 
+    // PIE CHART
+    new Chart(document.getElementById("categoryChart"), {
+        type: "pie",
+        data: {
+            labels: ["High", "Medium", "Low"],
+            datasets: [{
+                data: [data.high, data.medium, data.low],
+                backgroundColor: ["red", "orange", "green"]
+            }]
+        }
+    });
+
+    // SUMMARY BOX
+    let total = data.high + data.medium + data.low;
+
+    let highest = "Low";
+
+    if (data.high >= data.medium && data.high >= data.low) {
+        highest = "High";
+    } else if (data.medium >= data.high && data.medium >= data.low) {
+        highest = "Medium";
+    }
+
+    let message = "";
+
+    if (highest === "High") {
+        message = "🚨 Critical alert: High-risk incidents dominate the system.";
+    } else if (highest === "Medium") {
+        message = "⚠️ Warning: Medium-level incidents are most common.";
+    } else {
+        message = "🟢 System stable: Low-risk incidents dominate.";
+    }
+
+    document.getElementById("summaryBox").innerHTML = `
+        <p><b>Total Incidents:</b> ${total}</p>
+        <p><b>Dominant Level:</b> ${highest}</p>
+        <p>${message}</p>
+    `;
 });
 </script>
-
-    <!-- IMAGE UPLOAD -->
-    <label>Evidence Image (Optional)</label>
-    <input type="file" name="image" accept="image/*">
-
-    <button type="submit">Submit Report</button>
-
-
-</form>
 
 {% endblock %}

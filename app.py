@@ -239,6 +239,22 @@ def stats():
         "low": Report.query.filter_by(severity="low").count()
     })
 
+@app.route("/api/reports")
+@login_required
+def api_reports():
+    reports = Report.query.all()
+
+    return jsonify([
+        {
+            "title": r.title,
+            "category": r.category,
+            "severity": r.severity,
+            "latitude": r.latitude,
+            "longitude": r.longitude,
+            "created_at": str(r.created_at)
+        }
+        for r in reports
+    ])
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
