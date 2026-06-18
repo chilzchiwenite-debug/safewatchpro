@@ -60,7 +60,7 @@ def load_user(user_id):
 # ---------------- DB INIT ----------------
 with app.app_context():
     db.create_all()
-
+    create_admin_user()
 
 # ---------------- ROUTES ----------------
 @app.route("/")
@@ -228,6 +228,24 @@ def admin():
     reports = Report.query.all()
 
     return render_template("admin.html", users=users, reports=reports)
+
+def create_admin_user():
+    email = "chilzchiwenite@gmail.com"
+
+    admin = User.query.filter_by(email=email).first()
+
+    if not admin:
+        hashed_pw = bcrypt.generate_password_hash("chimeral1").decode("utf-8")
+
+        admin = User(
+            username="admin",
+            email=email,
+            password=hashed_pw,
+            role="admin"
+        )
+
+        db.session.add(admin)
+        db.session.commit()
 
 
 @app.route('/delete_user/<int:user_id>')
