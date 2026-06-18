@@ -57,10 +57,6 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-# ---------------- DB INIT ----------------
-with app.app_context():
-    db.create_all()
-    create_admin_user()
 
 # ---------------- ROUTES ----------------
 @app.route("/")
@@ -246,6 +242,11 @@ def create_admin_user():
 
         db.session.add(admin)
         db.session.commit()
+# ---------------- DB INIT ----------------
+with app.app_context():
+    db.create_all()
+    create_admin_user()
+
 
 
 @app.route('/delete_user/<int:user_id>')
