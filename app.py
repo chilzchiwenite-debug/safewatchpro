@@ -138,15 +138,32 @@ def login():
 
     return render_template("login.html")
 
+# ---------------- FORGOT PASSWORD ----------------
+@app.route("/forgot_password", methods=["GET"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
 
-# ---------------- LOGOUT ----------------
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Logged out successfully")
-    return redirect(url_for("login"))
+        user = User.query.filter_by(email=email).first()
 
+        if not user:
+            flash("If email exists, reset link has been sent.")
+            return redirect(url_for("login"))
+
+        token = serializer.dumps(email, salt="password-reset-salt")
+
+        reset_link = url_for("reset_password", token=token, _external=True)
+
+        send_email(
+            subject="SafeWatch Password Reset",
+            recipients=[email],
+            body=f"Click the link to reset your password:\n\n{reset_link}"
+        )
+
+        flash("Reset link sent to your email")
+        return redirect(url_for("login"))
+
+    return render_template("forgot_password.html")
 
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
