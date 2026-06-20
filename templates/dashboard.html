@@ -2,7 +2,24 @@
 
 {% block content %}
 
+<!-- NAVIGATION -->
+<div style="margin-bottom:15px;">
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/report">Report</a> |
+    <a href="/map">Map</a> |
+    <a href="/logout">Logout</a>
+</div>
+
 <h2>🚨 SafeWatch Control Center</h2>
+
+<!-- MAKE REPORT BUTTON -->
+<div style="margin:15px 0;">
+    <a href="{{ url_for('report') }}"
+       style="background:#d11; color:#fff; padding:10px 15px;
+              border-radius:8px; text-decoration:none; font-weight:bold;">
+        ➕ Make a Report
+    </a>
+</div>
 
 <div style="background:#a91d1d22; padding:12px; border-radius:10px; margin-bottom:15px;">
 
@@ -49,7 +66,7 @@
     <h4>{{ r.title }}</h4>
     <p>{{ r.description }}</p>
 
-    <p><b>State:</b> {{ r.state or "N/A" }}</p>
+    <p><b>Address:</b> {{ r.address or "N/A" }}</p>
     <p><b>Category:</b> {{ r.category }}</p>
     <p><b>Severity:</b> {{ r.severity }}</p>
 
