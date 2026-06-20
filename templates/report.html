@@ -2,120 +2,104 @@
 
 {% block content %}
 
-<h2>🚨 SafeWatch Control Center</h2>
+<div class="container mt-4">
 
-<div style="background:#a91d1d22; padding:12px; border-radius:10px; margin-bottom:15px;">
+    <div class="card shadow-lg">
+        <div class="card-header bg-danger text-white">
+            <h2>🚨 Make a Report</h2>
+            <p>Help keep your community safe by reporting an incident.</p>
+        </div>
 
-    <h3>🧠 Intelligence Summary</h3>
+        <div class="card-body">
 
-    <div id="summaryBox" style="background:#111;color:#fff;padding:15px;border-radius:10px;">
-        Loading insights...
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label class="form-label">Incident Title</label>
+                    <input type="text" class="form-control" name="title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="5" name="description" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-control" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Robbery">Robbery</option>
+                        <option value="Kidnapping">Kidnapping</option>
+                        <option value="Fire">Fire</option>
+                        <option value="Accident">Accident</option>
+                        <option value="Violence">Violence</option>
+                        <option value="Medical Emergency">Medical Emergency</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <input type="text" class="form-control" name="address">
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Latitude</label>
+                        <input type="text" class="form-control" id="latitude" name="latitude" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Longitude</label>
+                        <input type="text" class="form-control" id="longitude" name="longitude" required>
+                    </div>
+
+                </div>
+
+                <button type="button" class="btn btn-secondary mb-3"
+                        onclick="getLocation()">
+                    📍 Use My Current Location
+                </button>
+
+                <div class="mb-3">
+                    <label class="form-label">Upload Image</label>
+                    <input type="file" class="form-control" name="image">
+                </div>
+
+                <button type="submit" class="btn btn-danger w-100">
+                    🚀 Submit Report
+                </button>
+
+            </form>
+
+        </div>
+
     </div>
 
-    <p><b>Status:</b> <span style="color:green;">ACTIVE 🟢</span></p>
-
-    <p><b>Total Reports:</b> {{ reports|length }}</p>
-
 </div>
-
-<hr>
-
-<h3>📊 Incident Analytics</h3>
-
-<canvas id="reportChart" width="400" height="200"></canvas>
-<canvas id="categoryChart" width="400" height="200"></canvas>
-
-<hr>
-
-<h3>Recent Reports</h3>
-
-<style>
-.report-entry {
-    background: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    color: #000;
-}
-.report-entry.high { border-left: 5px solid red; }
-.report-entry.medium { border-left: 5px solid orange; }
-.report-entry.low { border-left: 5px solid green; }
-</style>
-
-{% for r in reports %}
-
-<div class="report-entry {{ r.severity|lower }}">
-
-    <h4>{{ r.title }}</h4>
-    <p>{{ r.description }}</p>
-
-    <p><b>State:</b> {{ r.state or "N/A" }}</p>
-    <p><b>Category:</b> {{ r.category }}</p>
-    <p><b>Severity:</b> {{ r.severity }}</p>
-
-</div>
-
-{% endfor %}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-fetch("/api/stats")
-.then(res => res.json())
-.then(data => {
+function getLocation() {
 
-    // BAR CHART
-    new Chart(document.getElementById("reportChart"), {
-        type: "bar",
-        data: {
-            labels: ["High", "Medium", "Low"],
-            datasets: [{
-                label: "Incident Levels",
-                data: [data.high, data.medium, data.low],
-                backgroundColor: ["red", "orange", "green"]
-            }]
-        }
-    });
+    if (navigator.geolocation) {
 
-    // PIE CHART
-    new Chart(document.getElementById("categoryChart"), {
-        type: "pie",
-        data: {
-            labels: ["High", "Medium", "Low"],
-            datasets: [{
-                data: [data.high, data.medium, data.low],
-                backgroundColor: ["red", "orange", "green"]
-            }]
-        }
-    });
+        navigator.geolocation.getCurrentPosition(function(position) {
 
-    // SUMMARY BOX
-    let total = data.high + data.medium + data.low;
+            document.getElementById("latitude").value =
+                position.coords.latitude;
 
-    let highest = "Low";
+            document.getElementById("longitude").value =
+                position.coords.longitude;
 
-    if (data.high >= data.medium && data.high >= data.low) {
-        highest = "High";
-    } else if (data.medium >= data.high && data.medium >= data.low) {
-        highest = "Medium";
-    }
+        });
 
-    let message = "";
-
-    if (highest === "High") {
-        message = "🚨 Critical alert: High-risk incidents dominate the system.";
-    } else if (highest === "Medium") {
-        message = "⚠️ Warning: Medium-level incidents are most common.";
     } else {
-        message = "🟢 System stable: Low-risk incidents dominate.";
-    }
 
-    document.getElementById("summaryBox").innerHTML = `
-        <p><b>Total Incidents:</b> ${total}</p>
-        <p><b>Dominant Level:</b> ${highest}</p>
-        <p>${message}</p>
-    `;
-});
+        alert("Geolocation is not supported on this device.");
+
+    }
+}
 </script>
 
 {% endblock %}
