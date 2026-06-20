@@ -57,7 +57,6 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-
 # ---------------- ROUTES ----------------
 @app.route("/")
 def index():
@@ -134,6 +133,16 @@ def login():
 
     return render_template("login.html")
 
+
+# ---------------- LOGOUT (🔥 FIXED) ----------------
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out")
+    return redirect(url_for("login"))
+
+
 # ---------------- FORGOT PASSWORD ----------------
 @app.route("/forgot_password", methods=["GET" , "POST"])
 def forgot_password():
@@ -160,6 +169,7 @@ def forgot_password():
         return redirect(url_for("login"))
 
     return render_template("forgot_password.html")
+
 
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
@@ -225,6 +235,7 @@ def admin():
 
     return render_template("admin.html", users=users, reports=reports)
 
+
 def create_admin_user():
     email = "chilzchiwenite@gmail.com"
 
@@ -242,11 +253,12 @@ def create_admin_user():
 
         db.session.add(admin)
         db.session.commit()
+
+
 # ---------------- DB INIT ----------------
 with app.app_context():
     db.create_all()
     create_admin_user()
-
 
 
 @app.route('/delete_user/<int:user_id>')
@@ -275,6 +287,7 @@ def stats():
         "low": Report.query.filter_by(severity="low").count()
     })
 
+
 @app.route("/api/reports")
 @login_required
 def api_reports():
@@ -291,6 +304,7 @@ def api_reports():
         }
         for r in reports
     ])
+
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
