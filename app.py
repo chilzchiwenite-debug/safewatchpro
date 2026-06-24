@@ -6,28 +6,47 @@ from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
+from flask_migrate import Migrate
 
-from config import Config
+from dotenv import load_dotenv
+
 from db import db
 from models import User, Report
 from engine import calculate_severity
 
 
+
+# ---------------- LOAD ENV ----------------
+load_dotenv()
+
 # ---------------- APP SETUP ----------------
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
 
-# ---------------- FIX: DATABASE ----------------
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
+
+app.config["MAIL_USERNAME"] = "chilzchiwenite@gmail.com"
+app.config["MAIL_PASSWORD"] = "gzck xmlu gbiz gsnp"
+app.config["MAIL_DEFAULT_SENDER"] = "chilzchiwenite@gmail.com"
+
+
+# DB
 db_url = os.getenv("DATABASE_URL")
-
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = db_url or app.config.get("SQLALCHEMY_DATABASE_URI")
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Upload folder
+app.config["UPLOAD_FOLDER"] = "uploads"
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # ---------------- EXTENSIONS ----------------
 db.init_app(app)
+migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 
@@ -36,19 +55,34 @@ login_manager.login_view = "login"
 
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
+# ---------------- TWILIO SETUP ----------------
 
-# ---------------- EMAIL ----------------
-def send_email(subject, recipients, body):
-    if not recipients:
-        return
 
-    msg = Message(
-        subject=subject,
-        sender=app.config.get("MAIL_DEFAULT_SENDER"),
-        recipients=recipients,
-        body=body
-    )
-    mail.send(msg)
+# ---------------- AUTHORITY NUMBERS ----------------
+AUTHORITY_NUMBERS = {
+    "Nigeria Police Force": "+2347057337653",
+    "Fire Service": "+2347065409291",
+    "FRSC (Road Safety)": "+2349139600038",
+    "Ambulance / Hospital Emergency": "+2348044444444",
+    "Local Security Agency": "+2348055555555"
+}
+
+# ---------------- AUTHORITY LOGIC ----------------
+def get_authority(category):
+    category = (category or "").lower()
+
+    if category in ["robbery", "kidnapping", "violence"]:
+        return "Nigeria Police Force"
+    elif category == "fire":
+        return "Fire Service"
+    elif category == "accident":
+        return "FRSC (Road Safety)"
+    elif category == "medical_emergency":
+        return "Ambulance / Hospital Emergency"
+    else:
+        return "Local Security Agency"
+
+# ---------------- SMS FUNCTION ----------------
 
 
 # ---------------- USER LOADER ----------------
@@ -56,126 +90,25 @@ def send_email(subject, recipients, body):
 def load_user(user_id):
     return db.session.get(User, int(user_id))
 
-
 # ---------------- ROUTES ----------------
 @app.route("/")
 def index():
+
+    if current_user.is_authenticated and current_user.role =="admin":
+        return redirect(url_for("admin"))
+
+
     return render_template("index.html")
 
 
-@app.route("/map")
-@login_required
-def map_view():
-    return render_template("map.html")
-
-
-# ---------------- REGISTER ----------------
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-
-        username = request.form.get("username")
-        email = request.form.get("email")
-        password = request.form.get("password")
-
-        if User.query.filter_by(email=email).first():
-            flash("Email already exists")
-            return redirect(url_for("register"))
-
-        if User.query.filter_by(username=username).first():
-            flash("Username already exists")
-            return redirect(url_for("register"))
-
-        hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
-
-        user = User(username=username, email=email, password=hashed_pw)
-
-        db.session.add(user)
-        db.session.commit()
-
-        send_email(
-            "Welcome to SafeWatch Pro 🚨",
-            [email],
-            f"Hello {username}, your account was created successfully."
-        )
-
-        flash("Registration successful")
-        return redirect(url_for("login"))
-
-    return render_template("register.html")
-
-
-# ---------------- LOGIN ----------------
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-
-        email = request.form.get("email")
-        password = request.form.get("password")
-
-        user = User.query.filter_by(email=email).first()
-
-        if not user:
-            flash("User not found")
-            return redirect(url_for("login"))
-
-        if bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            flash("Welcome back")
-
-            if user.role == "admin":
-                return redirect(url_for("admin"))
-
-            return redirect(url_for("dashboard"))
-
-        flash("Invalid password")
-        return redirect(url_for("login"))
-
-    return render_template("login.html")
-
-
-# ---------------- LOGOUT (🔥 FIXED) ----------------
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("You have been logged out")
-    return redirect(url_for("login"))
-
-
-# ---------------- FORGOT PASSWORD ----------------
-@app.route("/forgot_password", methods=["GET" , "POST"])
-def forgot_password():
-    if request.method == "POST":
-        email = request.form.get("email")
-
-        user = User.query.filter_by(email=email).first()
-
-        if not user:
-            flash("If email exists, reset link has been sent.")
-            return redirect(url_for("login"))
-
-        token = serializer.dumps(email, salt="password-reset-salt")
-
-        reset_link = url_for("reset_password", token=token, _external=True)
-
-        send_email(
-            subject="SafeWatch Password Reset",
-            recipients=[email],
-            body=f"Click the link to reset your password:\n\n{reset_link}"
-        )
-
-        flash("Reset link sent to your email")
-        return redirect(url_for("login"))
-
-    return render_template("forgot_password.html")
-
-
-# ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    reports = Report.query.order_by(Report.created_at.desc()).all()
+
+    if current_user.role =="admin":
+        return redirect(url_for("admine"))
+
+    reports = Report.query.order_by(Report.id.desc()).all()
     return render_template("dashboard.html", reports=reports)
 
 
@@ -185,11 +118,11 @@ def dashboard():
 def report():
     if request.method == "POST":
 
+        name = request.form.get("name")
         title = request.form.get("title")
         description = request.form.get("description")
         category = request.form.get("category")
-        latitude = request.form.get("latitude")
-        longitude = request.form.get("longitude")
+        state = request.form.get("state")
         address = request.form.get("address")
 
         severity = calculate_severity(category)
@@ -201,20 +134,27 @@ def report():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
+        authority = get_authority(category)
+
         new_report = Report(
+            name=name,
             title=title,
             description=description,
             category=category,
             severity=severity,
-            latitude=float(latitude),
-            longitude=float(longitude),
-            image=filename,
+            state=state,
             address=address,
-            user_id=current_user.id
+            image=filename,
+            user_id=current_user.id,
+            status="pending",
+            authority=authority
         )
 
         db.session.add(new_report)
         db.session.commit()
+
+        # 🚨 SEND SMS AFTER SAVE
+        send_sms_to_authority(new_report)
 
         flash("Report submitted successfully")
         return redirect(url_for("dashboard"))
@@ -231,80 +171,189 @@ def admin():
         return redirect(url_for("dashboard"))
 
     users = User.query.all()
-    reports = Report.query.all()
+    reports = Report.query.order_by(Report.id.desc()).all()
 
     return render_template("admin.html", users=users, reports=reports)
 
 
-def create_admin_user():
-    email = "chilzchiwenite@gmail.com"
+# ---------------- AUTH ----------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
 
-    admin = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email).first()
 
-    if not admin:
-        hashed_pw = bcrypt.generate_password_hash("chimeral1").decode("utf-8")
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
 
-        admin = User(
-            username="admin",
+            if user.role == "admin":
+                return redirect(url_for("admin"))
+
+            return redirect(url_for("dashboard"))
+
+        flash("Invalid credentials")
+
+    return render_template("login.html")
+
+@app.route("/make-admin")
+def make_admin():
+
+    user = User.query.filter_by(
+        email="chilzchiwenite@gmail.com"
+    ).first()
+
+    if not user:
+        return "User not found"
+
+    user.role = "admin"
+
+    db.session.commit()
+
+    return "User is now an admin"
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+
+
+@app.route("/map")
+@login_required
+def map_view():
+    reports = Report.query.all()
+    return render_template("map.html", reports=reports)
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        existing_user = User.query.filter_by(email=email).first()
+
+        if existing_user:
+            flash("Email already exists")
+            return redirect(url_for("register"))
+
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+
+        user = User(
+            username=username,
             email=email,
-            password=hashed_pw,
-            role="admin"
+            password=hashed_password,
+            role="user"
         )
 
-        db.session.add(admin)
+        db.session.add(user)
         db.session.commit()
 
+        flash("Account created successfully")
+        return redirect(url_for("login"))
 
-# ---------------- DB INIT ----------------
-with app.app_context():
-    db.create_all()
-    create_admin_user()
+    return render_template("register.html")
 
 
-@app.route('/delete_user/<int:user_id>')
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+
+    if request.method == "POST":
+        email = request.form.get("email")
+
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            token = serializer.dumps(user.email, salt="password-reset")
+
+            reset_link = url_for(
+                "reset_password",
+                token=token,
+                _external=True
+            )
+
+            msg = Message(
+                subject="SafeWatchPro Password Reset",
+                recipients=[user.email]
+            )
+
+            msg.body = f"""
+Hello,
+
+Click the link below to reset your password:
+
+{reset_link}
+
+This link expires in 1 hour.
+
+SafeWatchPro Team
+"""
+
+            mail.send(msg)
+
+        flash("If the email exists, a reset link has been sent.")
+        return redirect(url_for("login"))
+
+    return render_template("forgot_password.html")
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+
+    try:
+        email = serializer.loads(
+            token,
+            salt="password-reset",
+            max_age=3600
+        )
+    except:
+        flash("Reset link is invalid or expired.")
+        return redirect(url_for("forgot_password"))
+
+    user = User.query.filter_by(email=email).first()
+
+    if request.method == "POST":
+        new_password = request.form.get("password")
+
+        user.password = bcrypt.generate_password_hash(
+            new_password
+        ).decode("utf-8")
+
+        db.session.commit()
+
+        flash("Password updated successfully.")
+        return redirect(url_for("login"))
+
+    return render_template("reset_password.html")
+
+
+@app.route("/delete-user/<int:user_id>")
 @login_required
 def delete_user(user_id):
-    if not current_user.role == "admin":
-        return "Unauthorized", 403
+
+    if current_user.role != "admin":
+        flash("Access denied")
+        return redirect(url_for("dashboard"))
 
     user = User.query.get_or_404(user_id)
 
     db.session.delete(user)
     db.session.commit()
 
-    return redirect(url_for('admin'))
+    flash("User deleted successfully")
+    return redirect(url_for("admin"))
+    
 
 
-# ---------------- API ----------------
-@app.route("/api/stats")
-@login_required
-def stats():
-    return jsonify({
-        "users": User.query.count(),
-        "reports": Report.query.count(),
-        "high": Report.query.filter_by(severity="high").count(),
-        "medium": Report.query.filter_by(severity="medium").count(),
-        "low": Report.query.filter_by(severity="low").count()
-    })
-
-
-@app.route("/api/reports")
-@login_required
-def api_reports():
-    reports = Report.query.all()
-
-    return jsonify([
-        {
-            "title": r.title,
-            "category": r.category,
-            "severity": r.severity,
-            "latitude": r.latitude,
-            "longitude": r.longitude,
-            "created_at": str(r.created_at)
-        }
-        for r in reports
-    ])
-
+# ---------------- INIT DB ----------------
+with app.app_context():
+    db.create_all()
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

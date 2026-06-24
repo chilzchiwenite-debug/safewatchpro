@@ -4,102 +4,117 @@
 
 <div class="container mt-4">
 
-    <div class="card shadow-lg">
+    <div class="card shadow-lg border-0">
+
         <div class="card-header bg-danger text-white">
-            <h2>🚨 Make a Report</h2>
-            <p>Help keep your community safe by reporting an incident.</p>
+            <h3>🚨 Make a Report</h3>
+            <small>Report incidents quickly in your area</small>
         </div>
 
         <div class="card-body">
 
             <form method="POST" enctype="multipart/form-data">
 
+                <!-- NAME -->
                 <div class="mb-3">
-                    <label class="form-label">Incident Title</label>
-                    <input type="text" class="form-control" name="title" required>
+                    <label>Your Name</label>
+                    <input type="text" name="name" class="form-control" required>
                 </div>
 
+                <!-- TITLE -->
                 <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" rows="5" name="description" required></textarea>
+                    <label>Incident Title</label>
+                    <input type="text" name="title" class="form-control" required>
                 </div>
 
+                <!-- DESCRIPTION -->
                 <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select class="form-control" name="category" required>
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <!-- CATEGORY -->
+                <div class="mb-3">
+                    <label>Category</label>
+                    <select name="category" class="form-control" required>
                         <option value="">Select Category</option>
-                        <option value="Robbery">Robbery</option>
-                        <option value="Kidnapping">Kidnapping</option>
-                        <option value="Fire">Fire</option>
-                        <option value="Accident">Accident</option>
-                        <option value="Violence">Violence</option>
-                        <option value="Medical Emergency">Medical Emergency</option>
-                        <option value="Other">Other</option>
+                        <option value="robbery">Robbery</option>
+                        <option value="kidnapping">Kidnapping</option>
+                        <option value="fire">Fire</option>
+                        <option value="accident">Accident</option>
+                        <option value="violence">Violence</option>
+                        <option value="medical_emergency">Medical Emergency</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
 
+                <!-- STATE ONLY -->
                 <div class="mb-3">
-                    <label class="form-label">Address</label>
-                    <input type="text" class="form-control" name="address">
+                    <label>State</label>
+                    <select name="state" class="form-control" required>
+                        <option value="">Select State</option>
+                        <option>Abia</option>
+                        <option>Adamawa</option>
+                        <option>Akwa Ibom</option>
+                        <option>Anambra</option>
+                        <option>Bauchi</option>
+                        <option>Bayelsa</option>
+                        <option>Benue</option>
+                        <option>Borno</option>
+                        <option>Cross River</option>
+                        <option>Delta</option>
+                        <option>Ebonyi</option>
+                        <option>Edo</option>
+                        <option>Ekiti</option>
+                        <option>Enugu</option>
+                        <option>FCT</option>
+                        <option>Gombe</option>
+                        <option>Imo</option>
+                        <option>Jigawa</option>
+                        <option>Kaduna</option>
+                        <option>Kano</option>
+                        <option>Katsina</option>
+                        <option>Kebbi</option>
+                        <option>Kogi</option>
+                        <option>Kwara</option>
+                        <option>Lagos</option>
+                        <option>Nasarawa</option>
+                        <option>Niger</option>
+                        <option>Ogun</option>
+                        <option>Ondo</option>
+                        <option>Osun</option>
+                        <option>Oyo</option>
+                        <option>Plateau</option>
+                        <option>Rivers</option>
+                        <option>Sokoto</option>
+                        <option>Taraba</option>
+                        <option>Yobe</option>
+                        <option>Zamfara</option>
+                    </select>
                 </div>
 
-                <div class="row">
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Latitude</label>
-                        <input type="text" class="form-control" id="latitude" name="latitude" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Longitude</label>
-                        <input type="text" class="form-control" id="longitude" name="longitude" required>
-                    </div>
-
-                </div>
-
-                <button type="button" class="btn btn-secondary mb-3"
-                        onclick="getLocation()">
-                    📍 Use My Current Location
-                </button>
-
+                <!-- ADDRESS -->
                 <div class="mb-3">
-                    <label class="form-label">Upload Image</label>
-                    <input type="file" class="form-control" name="image">
+                    <label>Exact Location (Street / Bus Stop / Landmark)</label>
+                    <input type="text" name="address" class="form-control"
+                           placeholder="e.g. Ogbete Main Market, Enugu" required>
                 </div>
 
-                <button type="submit" class="btn btn-danger w-100">
+                <!-- IMAGE -->
+                <div class="mb-3">
+                    <label>Upload Image (Optional)</label>
+                    <input type="file" name="image" class="form-control">
+                </div>
+
+                <button class="btn btn-danger w-100">
                     🚀 Submit Report
                 </button>
 
             </form>
 
         </div>
-
     </div>
 
 </div>
-
-<script>
-function getLocation() {
-
-    if (navigator.geolocation) {
-
-        navigator.geolocation.getCurrentPosition(function(position) {
-
-            document.getElementById("latitude").value =
-                position.coords.latitude;
-
-            document.getElementById("longitude").value =
-                position.coords.longitude;
-
-        });
-
-    } else {
-
-        alert("Geolocation is not supported on this device.");
-
-    }
-}
-</script>
 
 {% endblock %}

@@ -2,24 +2,50 @@
 
 {% block content %}
 
-<h2>Login</h2>
+<div style="max-width:420px; margin:40px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);">
 
-<form method="POST">
+    <h2 style="text-align:center; color:green;">Create Account</h2>
 
-    <input name="email" type="email" placeholder="Email" required>
-    <br><br>
+    <form method="POST">
 
-    <input name="password" type="password" placeholder="Password" required>
-    <br><br>
+        <label>Username</label>
+        <input 
+            type="text" 
+            name="username" 
+            required 
+            style="width:100%; padding:10px; margin:8px 0;"
+        >
 
-    <button type="submit">Login</button>
+        <label>Email</label>
+        <input 
+            type="email" 
+            name="email" 
+            required 
+            style="width:100%; padding:10px; margin:8px 0;"
+        >
 
-</form>
+        <label>Password</label>
+        <input 
+            type="password" 
+            name="password" 
+            required 
+            style="width:100%; padding:10px; margin:8px 0;"
+        >
 
-<br>
+        <button 
+            type="submit" 
+            style="width:100%; padding:10px; background:green; color:white; border:none; border-radius:5px;"
+        >
+            Register
+        </button>
 
-<a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
-<br>
-<a href="/register">Create an account</a>
+    </form>
+
+    <p style="text-align:center; margin-top:15px;">
+        Already have an account?
+        <a href="{{ url_for('login') }}">Login</a>
+    </p>
+
+</div>
 
 {% endblock %}

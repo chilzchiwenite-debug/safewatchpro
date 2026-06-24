@@ -1,23 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SafeWatch Pro</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <nav>
-        <a href="/">Home</a> |
-        <a href="/login">Login</a> |
-        <a href="/register">Register</a> |
-        <a href="/dashboard">Dashboard</a> |
-        <a href="/report">Report</a> |
-        <a href="/logout">Logout</a>
-    </nav>
+{% block content %}
 
-    <hr>
+<style>
+.hero {
+    background: linear-gradient(135deg, #b30000, #ff4d4d);
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+    border-radius: 15px;
+    margin-top: 20px;
+}
 
-    {% block content %}{% endblock %}
+.hero h1 {
+    font-size: 42px;
+    font-weight: bold;
+}
 
-</body>
-</html>
+.hero p {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.btn-main {
+    background: white;
+    color: #b30000;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    margin: 10px;
+    display: inline-block;
+}
+
+.btn-main:hover {
+    background: #f2f2f2;
+}
+
+.section {
+    margin-top: 40px;
+}
+
+.card-box {
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    background: white;
+    transition: 0.3s;
+}
+
+.card-box:hover {
+    transform: translateY(-5px);
+}
+
+.icon {
+    font-size: 40px;
+    color: #b30000;
+    margin-bottom: 10px;
+}
+</style>
+
+<!-- HERO SECTION -->
+<div class="hero">
+    <h1>🚨 SafeWatch Pro</h1>
+    <p>Report incidents instantly. Help keep your community safe and secure.</p>
+
+    <a href="{{ url_for('register') }}" class="btn-main">Get Started</a>
+    <a href="{{ url_for('login') }}" class="btn-main">Login</a>
+</div>
+
+<!-- FEATURES -->
+<div class="container section">
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card-box">
+                <div class="icon">📍</div>
+                <h4>Real-Time Reporting</h4>
+                <p>Report incidents with location, category, and severity instantly.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-box">
+                <div class="icon">⚡</div>
+                <h4>Fast Response System</h4>
+                <p>Admins can monitor and respond to emergencies quickly.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-box">
+                <div class="icon">🔒</div>
+                <h4>Secure Platform</h4>
+                <p>Your reports and data are safely stored and protected.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ABOUT SECTION -->
+<div class="container section">
+    <div class="card-box">
+        <h3>About SafeWatch Pro</h3>
+        <p>
+            SafeWatch Pro is a community safety system designed to help people report emergencies 
+            like fire outbreaks, accidents, robbery, and medical issues. 
+            Together we build a safer society.
+        </p>
+    </div>
+</div>
+
+{% endblock %}
