@@ -304,12 +304,17 @@ SafeWatchPro Team
 """
 
             try:
-    mail.send(msg)
-        flash("If the email exists, a reset link has been sent.")
-        except Exception as e:
-            return f"Mail Error: {e}"
-            
+                mail.send(msg)
+                flash("If the email exists, a reset link has been sent.")
+            except Exception as e:
+                return f"Mail Error: {e}"
+
+        else:
+            flash("If the email exists, a reset link has been sent.")
+
         return redirect(url_for("login"))
+
+    return render_template("forgot_password.html")
 
 
 
