@@ -305,13 +305,13 @@ SafeWatchPro Team
 
             try:
     mail.send(msg)
-except Exception as e:
-    return f"Mail Error: {e}"
-
         flash("If the email exists, a reset link has been sent.")
+        except Exception as e:
+            return f"Mail Error: {e}"
+            
         return redirect(url_for("login"))
 
-    return render_template("forgot_password.html")
+
 
 
 @app.route("/reset-password/<token>", methods=["GET", "POST"])
