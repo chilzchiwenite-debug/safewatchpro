@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 from dotenv import load_dotenv
 
@@ -27,9 +28,11 @@ app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
 app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
 app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
 
-app.config["MAIL_USERNAME"] = "chilzchiwenite@gmail.com"
-app.config["MAIL_PASSWORD"] = "gzck xmlu gbiz gsnp"
-app.config["MAIL_DEFAULT_SENDER"] = "chilzchiwenite@gmail.com"
+
+
+app.config["MAIL_USERNAME"] = os.getenv("chilzchiwenite@gmail.com")
+app.config["MAIL_PASSWORD"] = os.getenv("gzck xmlu gbiz gsnp")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("chilzchiwenite@gmail.com")
 
 
 # DB
@@ -106,7 +109,7 @@ def index():
 def dashboard():
 
     if current_user.role =="admin":
-        return redirect(url_for("admine"))
+        return redirect(url_for("admin"))
 
     reports = Report.query.order_by(Report.id.desc()).all()
     return render_template("dashboard.html", reports=reports)
@@ -357,9 +360,4 @@ with app.app_context():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
-
-
     app.run(debug=True)

@@ -29,10 +29,11 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
 
-    MAIL_USERNAME = "chilzchiwenite@gmail.com"
-    MAIL_PASSWORD = "tdos fdvf ovev gkux"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_USERNAME")
 
-    MAIL_DEFAULT_SENDER = "chilzchiwenite@gmail.com"
+
 
     UPLOAD_FOLDER = os.path.join(basedir, "static", "uploads")
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size
