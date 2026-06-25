@@ -298,7 +298,10 @@ This link expires in 1 hour.
 SafeWatchPro Team
 """
 
-            mail.send(msg)
+            try:
+    mail.send(msg)
+except Exception as e:
+    return f"Mail Error: {e}"
 
         flash("If the email exists, a reset link has been sent.")
         return redirect(url_for("login"))
@@ -355,8 +358,8 @@ def delete_user(user_id):
 
 
 # ---------------- INIT DB ----------------
-with app.app_context():
-    db.create_all()
+#with app.app_context():
+    #db.create_all()#
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
