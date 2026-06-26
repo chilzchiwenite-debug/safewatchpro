@@ -21,19 +21,18 @@ from engine import calculate_severity
 load_dotenv()
 
 # ---------------- APP SETUP ----------------
-app = Flask(__name__)
+app = Flask(_name_)
+
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
 
 app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
 app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
 app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
+app.config["MAIL_USE_SSL"] = False
 
-
-
-app.config["MAIL_USERNAME"] = os.getenv("chilzchiwenite@gmail.com")
-app.config["MAIL_PASSWORD"] = os.getenv("gzck xmlu gbiz gsnp")
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("chilzchiwenite@gmail.com")
-
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
 
 # DB
 db_url = os.getenv("DATABASE_URL")
