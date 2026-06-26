@@ -302,16 +302,16 @@ This link expires in 1 hour.
 SafeWatchPro Team
 """
 
-           try:
-    print("MAIL_SERVER:", app.config["MAIL_SERVER"])
-    print("MAIL_PORT:", app.config["MAIL_PORT"])
-    print("MAIL_USERNAME:", app.config["MAIL_USERNAME"])
+            try:
+                print("MAIL_SERVER:", app.config["MAIL_SERVER"])
+                print("MAIL_PORT:", app.config["MAIL_PORT"])
+                print("MAIL_USERNAME:", app.config["MAIL_USERNAME"])
 
-    mail.send(msg)
-    flash("If the email exists, a reset link has been sent.")
+                mail.send(msg)
+                flash("If the email exists, a reset link has been sent.")
 
-except Exception as e:
-    return f"Mail Error: {e}"
+            except Exception as e:
+                return f"Mail Error: {e}"
 
         else:
             flash("If the email exists, a reset link has been sent.")
