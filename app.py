@@ -21,7 +21,7 @@ from engine import calculate_severity
 load_dotenv()
 
 # ---------------- APP SETUP ----------------
-app = Flask(_name_)
+app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
 
